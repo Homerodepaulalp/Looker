@@ -592,6 +592,6 @@ When data gathering for identifying key use cases, keep these objectives in mind
 Document all the priority use cases aligned to each user and business process—including all
 leading and lagging indicators
 Identify baseline measures for organizational metrics before and after Looker
-Dene "Value 1"—the primary use case(s)
+Define "Value 1"—the primary use case(s)
 
 .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
