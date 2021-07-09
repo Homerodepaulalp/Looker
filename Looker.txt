@@ -1,0 +1,597 @@
+././././././ Why use looker? ././././././
+>Companies who adopt looker can make quick, accurate and informed decisions.
+
+-Viewing Dashboard
+There's two different main types of content: Looks and dashboards
+Looks are saved reports and dashboards are essentially a collection of tiles each with the answer to a particular question
+
+-Limiting the data on dashboard with filters
+Filters are change that we can make to get different insights from same data
+Filters don't change nothing to other people
+Can hide some informations in visualizations
+
+-Finding reports
+Looks are saved reports, dashboard are a collection of tiles
+-You can group by more than 1 attribute at same time (type and collor for example)
+
+Starting a dashboard from zero:
+Fields
+Dimensions & measures that relate to columns in your database table.
+The simplest dimension fields will often correspond to the columns that are present
+in your database table. You can also use Looker to build your own dimensions on top of those that are available within the underlying table.
+Measures apply aggregations to underlying table columns or other dimensions that you’ve defined.
+
+Views
+Contain dimensions, measures, & relationships to database table.
+View files typically correspond to tables that exist within your database. Within a view file, you’ll define all of your dimensions and measures, or field that you want users to be able to include in their queries.
+
+Explores
+Define the join logic between views.
+An Explore is a starting point for userqueries. 
+Explores can be built using a single view or by joining several viewstogether. 
+For Explores built using many views, you are able to define the specific join logic that should be applied so that the generated SQL uses the proper join criteria.
+
+Models
+Sets the database connection, contains Explores.
+Model files typically contain connection information along with one or more Explore definitions. 
+A project can contain multiple models.
+
+Projects
+Collection of Model and View files.
+LookML projects contain a collection of Looker files, such as View and Model.
+Projects are the highest level of Looker object organization and are like independent Looker instances.
+Files typically are not shared between projects, so the use of multiple projects is usually best when you have completely separate data sources.
+
+How looker writes SQL:
+Looker builds and executes SQL queries directly against your database based on the fields and logic that you define within the LookML. 
+Any user in the organization can build their own reports and dashboards using SQL queries without actually knowing how to write SQL. 
+Since you’re going to be writing the LookML that controls this SQL, it’s important to understanding how Looker generates SQL so that you can write the most efficient queries.
+Using Looker’s modeling language, known as LookML, you define your business logic based on columns in your table. In the example below, the names of users are stored in a column in the database and can be represented with the following LookML dimension.
+Because the field selected is a dimension, it gets added to the SELECT and GROUP BY clauses.
+Because you specify which fields should be aggregated using the LookML, Looker will treat them accordingly when generating a SQL query. For example,  if you want to see the number of users in a given state, you can add a count of users into the Explore query. You don’t have to know that count is an aggregate measure function. Looker will automatically add the measure to your SELECT statement, but it will not appear in the GROUP BY clause.
+To filter by a dimension, you can simply apply a filter within the Explore on any dimension, and that filter will populate the WHERE  clause of the query. 
+If you filter by a field that is an aggregate, Looker will automatically apply that filter in the HAVING clause.
+There are also opportunities for you to write your own SQL statements within Looker, so be sure that any custom SQL that you write is also as efficient as it can be!
+
+./././././ Development Mode ./././././
+A Looker data model can exist in two states: Production Mode and Development Mode. 
+The production data model is shared across all users, and the LookML files are treated as read-only. 
+In order to write or change LookML in Looker, you will need to turn on Development Mode. 
+When you turn on Development Mode, you are taken to a separate version of the data model that you can edit and test without affecting end users. 
+
+Looker integrates with Git for version control, so in Git terms, the production data model is pointing to the code in the master git branch. 
+Turning on Development Mode takes you to your own Git branch within the project repository. 
+Changes made in Development Mode will only be visible to you or another developer who is viewing your Git branch. 
+Once you have made and tested changes in your development version of the model, you can commit those changes via Looker.
+Because LookML is version controlled with Git, you can collaborate on the same project with multiple developers. When there are multiple developers working in the same project, it is possible for more than one person to make changes to the same thing. When this occurs, Git will identify this scenario as a merge conflict and ask you to review the code and ensure that the correct pieces are retained.
+
+It is best to commit often in order to minimize merge conflicts.
+Once changes have been committed and any merge conflicts resolved, you are able to deploy your changes to production provided that you have the appropriate permissions. 
+This should only be done after all code has been fully tested, as any changes deployed will now be merged into your master Git branch and will affect your end users.
+
+File Browser
+Under the File Browser, project files are shown in the side panel of the Looker IDE. 
+If your project is enabled for IDE folders, LookML developers can customize the file organization to match your project. 
+If your project is not enabled for folders, the IDE organizes your files according to file type, such as document, model, view, dashboard, or data.
+
+Object Browser
+The Object Browser displays all of the objects in the project, and can be used to navigate to the LookML for a specific object. 
+This can be a useful alternative to navigating your project by file or folder, as it may be easier to find specific LookML objects and understand the relationships between them.
+
+Search
+The Looker IDE has a find and replace function so that you can search all of your project files for text, and replace all instances or selected instances in a bulk operation.
+
+Git Actions
+All git actions for a project are found under the Git Actions page. 
+Options include switching branches, committing changes, pulling from production and more. 
+
+Project Settings
+The Project Settings page can be used to change the configuration of a project. 
+Git connections, code quality, and project deletion are all controlled through this page. 
+Use caution while editing these settings; project setting changes apply to all developers.  
+
+Git Branching
+Because Looker integrates with Git for version control, we can take advantage of Git branches when developing. 
+When you go into Development Mode, Looker automatically creates a personal development branch for you. 
+Your personal branch is specific to you and is read-only to all other developers. 
+You will also be able to view and test, but not change, code in other developers' personal branches.
+In addition to your personal branch, you can create other Git branches. This is useful in cases where you are in the middle of a major project, but want to resolve a minor issue or implement a quick fix. 
+
+You can choose the branch you want to fork to create the new branch, make your fix, and deploy that branch’s changes to production.  
+After you have deployed your changes to production, you can resume work in your original branch. 
+You can also use this ability to view and create other branches in order to easily collaborate with other developers. By creating a shared branch, you can develop and test code with other developers, allowing for easy collaboration on larger projects.
+
+./././././ Fundamentals of Writing LookML ./././././
+-LookML is a modeling language that allows you to infuse your company's logic into columns from your database. 
+One way to think about LookML is that it is an abstracted form of SQL, so if you know SQL then elements of LookML will probably look familiar to you.
+-You can build table relationships and define fields within LookML using SQL logic that is reusable. 
+You should define all of the important columns in your database and build out your key business metrics within LookML. 
+Because Looker runs queries directly against your database, any syntax or functions that you can use in your database can also be used in Looker.
+-When you first connect your database to Looker, you can automatically bring in all of the tables that you need. 
+
+view: order{
+    sql_table_name:public.orders ;;                 (Your database table)
+    dimension: id {
+        primary_key: yes
+        type: number
+        sql: ${TABLE}.id ;;
+    }
+    dimension_group:created{
+        type: time
+        timeframes: [                               (Dimensions representing columns in database)
+            raw,
+            time,
+            date,
+            week,
+            month,
+            quarter,
+            year
+        ]
+        sql:${table}.created_at ;;
+    }
+    dimension: traffic_source{
+        type: string
+        sql:${TABLE}.created_at ;;
+    }
+    dimension: status {
+        type: string
+        sql: ${TABLE}.status ;;
+    }
+    dimension:traffic_source{
+        type: string
+        sql:${TABLE}.traffoc_source;;
+    }
+
+}
+
+#use Parameter:Value#
+All of the tables that you bring in will immediately become available in Looker as view files. 
+A view is essentially your table defined in Looker. 
+The columns of the table in your database will initially be created in Looker as dimensions. 
+You can then use LookML to build additional dimensions and measures that incorporate your business logic. 
+When writing LookML, you will declare a parameter and then assign a value to it. 
+For example, the parameter that dictates your table name for this view is sql_table_name. 
+Because the view references the underlying database table called orders, the value assigned to this parameter is public.orders.
+This parameter declaration and value assignment will be consistent throughout all of the LookML you write. 
+In the SQL statement, ${TABLE} means that the field will reference the underlying table identified with sql_table_name.  
+The ${} syntax is referred to as substitution syntax within LookML, and makes the code you write highly flexible and reusable. 
+For example, if the name of your underlying database table changes, you will only need to update that change in one place, the sql_table_name parameter. 
+All of the dimensions that rely on that sql_table_name will reference the new table name because of the ${TABLE} substitution syntax.
+
+In addition to the basic dimensions that are auto-generated when a view is created,  you can write your own custom dimensions from database fields that represent your company’s business logic. 
+For example, if you want to combine the dimension for a user's city with the dimension for the user's state, you can create a new dimension that concatenates the fields together. 
+A dimension's SQL parameter accepts dialect-specific SQL, so any code written will need to be in the same SQL dialect as your database. 
+
+dimension: city_state{
+    type:string
+    sql:${city} || ', ' || ${state} ;;
+}
+
+From here, you have all the building blocks you need from your database to infuse your company’s metrics and logic. 
+You can put these fields together in different ways (example), aggregate, and even join views together using this same basic syntax. 
+Define the SQL once, and then reuse it everywhere you need.
+
+./././././ Add New Views ./././././
+When a new LookML project is created, you can generate view files within that project that represent tables in your database. 
+A dimension will be automatically generated for each column in a table. 
+If at any point you need to generate a new view based on a table after the project is created (for example, if a new table gets added to the database), you can use the Create View from Table option.
+Selecting the Create View from Table option will open up a menu that shows all tables available within your data connection. 
+You can then select one or more of the tables in your database that you want to bring into Looker.
+Once you have selected your tables, click Create Views at the bottom of the page.
+Looker then creates a new view within your project based on the table(s) you selected. 
+Within this new view, Looker automatically writes LookML dimensions for every column that exists in the table as well as a count measure that represents a count (*) of the table.
+Using the Create View from Table option allows you to quickly start developing and exploring any time a new table is added to your database.
+
+Geographic Dimensions
+Looker has several ways to work with geographic dimensions within your data. 
+For static area dimensions, such as country, state, or zip code, there are map layers available natively in Looker that you can use. 
+Point mapping is available if your data has latitude and longitude values.
+
+./././././ Counts and Counts Distinct ./././././
+Looker uses objects called measures to represent aggregate functions like sums, counts, and averages. 
+Measures in Looker will be created in a very similar manner to dimensions. 
+The object type, which is measure, is stated, and then information such as the measure type and a SQL parameter are added in order to define the measure.
+Common measure types that you will use within Looker include sum, average, count, and count_distinct. A count is the simplest, so that’s the best place to start.
+-Count:
+measure:count{
+    type:count
+}
+
+-Count Distinct
+dimension: product_sku{
+    type: string
+    sql:${TABLE}.product_sku ;;
+}
+
+./././././ Sums and Averages ./././././
+In addition to count measures, other aggregate functions like sums and averages also have a dedicated type in Looker. By creating measures of type: sum and type: average, you can quickly perform analysis on your data.
+measure: total_cost{
+    type:sum
+}
+
+In this example, because you are looking at the total cost of inventory items, you want to sum up the field ${cost}.
+measure: total_cost {
+    type:sum
+    sql:${cost} ;;
+}
+
+
+The value_format_name parameter has been added here as well, since the average cost is in units of US dollars.
+measure: average_cost{
+    type:average
+    sql:${cost} ;;
+    value_format_name: usd
+}
+
+./././././ Additional Field Parameters ./././././
+
+Beyond building out dimensions and measures within your model, it’s important that you create an intuitive experience that enables users to explore the data. 
+This means considering how those fields are labeled and organized. 
+There are a few additional parameters that can be added to any field in order to adjust the way it appears in the user interface.
+
+-The hidden parameter: View files often contain fields that aren’t helpful for users. 
+These could be database fields, ID fields, or maybe dimensions that are mainly used for creating aggregations. 
+While these fields may be important within the LookML, they don’t need to be exposed to users. 
+To hide these fields from the user interface while still referencing them in the LookML, apply the hidden parameter. 
+
+dimension: id {
+    hidden: yes
+    type:number
+    sql:${TABLE}.id ;;
+}
+
+-The label parameter
+There is also a label parameter that you can apply in order to change the way a field’s name appears in the user interface.  
+By default, a dimension or measure name in the Explore is based on the LookML object name, with the first letter of each word capitalized, and the underscores converted into spaces. 
+In some scenarios, you may want to create a custom name for a field that will be more recognizable to users. 
+When a view file is generated, a count measure named count is added. 
+If you have multiple fields all named "count," it may be confusing for users. 
+Adding a label that specifies what is being counted can resolve confusion. 
+
+measure: count{
+    label: "Number of order items"
+    type: count
+    drill_fields: [detail*]
+}
+
+-The description parameter  
+When you are building custom fields in LookML, it is helpful to provide a definition or description of what a dimension or measure actually means. 
+You can add this information using the description parameter. 
+For example, consider the dimension you saw in the Yesno Dimensions lesson, long_fulfillment. 
+From the name alone, it may not be clear to a user what constitutes a long fulfillment time for an order. 
+Adding a description parameter will make it clear to anyone how you have defined a long fulfillment time. 
+
+dimension:long_fulfillment{
+    description: "Yes means the order took over 7 days to fulfill."
+    type: Yesno
+    sql: ${days_fulfillment} > 7 ;;
+}
+
+-Drill Fields
+Aggregate numbers like sums and counts provide an overview of data trends, but sometimes it is helpful to have the option to see the more detailed data behind the aggregate number. 
+Drill fields allow you to specify what data should be available to users when drilling down into a measure. 
+Suppose you want to give users more detail behind a count of order items. 
+You’d like them to be able to see the order ID, the inventory item product name, and the user ID of the user who has purchased each order item. 
+You begin by adding the drill_fields parameter to the count measure in order items. 
+
+measure: count{
+type: count
+drill_fields: []
+}
+
+Next, list out the fields you want to include in the drill_fields parameter. 
+
+measure: count {
+    type: count
+    drill_fields: [orders.id, inventory_items.product_name, users.id]
+}
+
+If you add this field to an Explore, now the drill fields you specify will appear in the drill modal when you click on the count of order items.
+
+-Sets
+You can define drill fields on an individual measure using the method above. 
+However, if you wish to use the same drill fields in multiple places, it is beneficial to define a set. 
+A set allows you to define a list of fields in one place that you can then reuse as many times as you need. 
+Then, if you need to update the field list, you can change it once within the set.
+
+set: order_detail {
+    fields: [
+        id,
+        orders.id,
+        users.id,
+        users.first_name,
+        users.last_name,
+        inventory_items.id,
+        inventory_items.product_name
+    ]
+}
+
+To use this set in a drill on a measure, you will reference the name of the set followed by an asterisk. 
+measure: count{
+    type:count
+    drill_fields: {order_detail*}
+}
+
+If you wish to add a field to the set, you only need to add it in one place and that change will propagate to anywhere the set is being used. 
+Drill fields can also be applied to dimensions for creating hierarchical drill paths. 
+Work with your users to understand what information they would be interested in seeing when drilling into the data, and then build your sets and apply drill fields accordingly.
+
+./././././ Creating Explores ./././././
+Every SQL query has a FROM clause, and in Looker the FROM clause is determined by an object called an Explore. 
+An Explore, just like a SQL FROM clause, can include a single table or multiple tables. 
+You create Explores in the model file using the same logic that you used for creating dimensions and measures, by defining a LookML object (an explore) and assigning a name and other parameters. 
+
+The simplest Explore you can create is one that is based on only one view. 
+For example, if you have data about your orders in a view named orders, you can create an Explore to expose these fields to users for analysis by adding the following to a model file.
+
+explore: order_items{}
+
+This means that the order_items view will always be a part of the FROM clause when a user builds a query using this Explore.
+
+-Join in Other Views
+Suppose you have a view containing details about order items, and another view contains details about all the orders and the users who placed them. 
+You need to analyze items ordered over time to understand demand, and to look at the items in each order, you will need to be able to query these two views together. 
+Let’s take a look at how you can build an Explore that joins together the order_items and orders views. 
+To begin, you define the view that should be joined to order_items, which is the orders view in this case. 
+
+explore: order_items {
+    join: orders{}
+}
+
+-Define Join Type
+In the underlying database, the order_items table has relationships to other tables, so we can define those relationships within the join. 
+
+First you will define the type of join that should be used. 
+The options available are left outer join, inner join, full outer join, and cross join. 
+In this example, a left outer join is used. 
+
+explore:order_items{
+    join: orders{
+        type: left-outer
+    }
+}
+
+-Define Join Condition
+Next, a sql_on parameter is used to define how the order_items and users views relate to each other. 
+This will become the ON clause within the join in SQL. 
+In the order_items view there is a field called order_id. 
+In the orders view there is a field called id which corresponds to the order_id field. 
+You will use these fields in the sql_on parameter. 
+
+explore: order_items {
+    join: orders{
+        type: left_outer
+        sql_on:${order_items.order_id} = ${orders.id} ;;
+    }
+}
+
+-Define Join Relationship
+There can be many order items in one order, so the relationship between order_items and orders is many_to_one. 
+Please carefully consider the relationships between the items you are joining.
+Multiple views can be added to an Explore to allow for more complex analysis. 
+For example, if you wanted to join in a users table to the order_items Explore you would repeat the process above.
+
+explore: order_items {
+    join: orders {
+        type: left_outer
+        sql_on: ${order_items.order_id} = ${orders.id} ;;
+        relationship: many_to_one
+    }
+    join: users{
+        type:left_outer
+        sql_on:${order_items.user_id} = ${users.id} ;;
+        relationship: many_to_one
+    }
+}
+
+These Explores create powerful starting points for users to query their data. However, having too many Explores can cause confusion for users, so do be sure that any Explore you create has a clear purpose.
+
+./././././ Table calculation ./././././
+Table calculations are a toolbox of pre-built expressions which open up a world of possibilities for the data in your explore table
+Examples: sum(), mean(), concat(), diff_days()
+Should i use a table calculation always?
+No. Additionally, table calculations do not involve sending a new query to a database.
+So, if you want to use a field in a calculation it must be selected in the data table in the Explore
+-Table calculations should be used for one-off calculations on explores that return fewer than 5000 rows
+
+How to know if i have to use table calculation:
+If the data have more than 5000 rows dont use a table calculation, add to the LookML
+-Table calculations only operate on the numbers we see in the data table, and are therefore limited to 5000 rows.
+
+Is the calculation something i want to re-use or have other use in the future?
+If yes, add calculation to the LookML, if no, use table calculation
+
+./././././ How to do a table calculation ./././././
+Looker expressions (Lexp)
+-Table calcs are built using a language called Lexp (or looker expressions)
+-Lexp provides a variety of pre-built functions like sums and means, statistical functions, and functions for string manipulation
+Example: sum(), min(), concat(), length(), diff_days()
+
+Using fields in the explore: 
+Table calcs do not involve sending a new qery to a database. If you want to use a field in a calculation it must be selected in the data table in the explore
+Fields can be used to create a table calculation, and then hidden from the visualization to create a cleaner visualization
+-Table calcs are written using looker expressions (Lexp)
+-Basic mathematical operations like addition, subtraction, multiplication, and division can be done in a table calc
+-Fields used in a table calculation can be hidden from the final visualization for a cleaner presentation
+
+./././././ Sum Functions ./././././
+The sum() mathematical function can be used to add up all the values of a column into a single value
+Unlike table totals, which use a SQL sum, the sum() function is a basic summation of the values in the columns
+sum(${field_to_sum})
+-The sum() function can be used to add up the values in a column data
+-A percent-of-total calculation can be created using the pattern ${field_name}/sum({field_name})
+
+./././././ String functions ./././././
+String functions can be used on sentences, words or letters, which are collectively called "strings"
+You can use string functions to capitalize words and letters, extract parts of phrase, etc
+upper{"monday"} > MONDAY
+The concat() string function allows you to combine dimensions and measures, and is a useful way to more clearly convey metrics
+Trimming strings: A string field down to a certain number of characters using the substring() function
+Substring() function takes three arguments
+substring(string, start_position, length)
+The output is a substring of string beginning at start_position consisting of legth characters
+
+./././././ Logical Functions ./././././
+Logical table calculation functions like AND, OR and if() allow you to manipulate your db on certain conditions
+the if() function takes three arguments
+if(yesno_expression, value_if_yes, value_if_no)
+
+./././././ Offset functions ./././././
+Basic aggregate measures can lack depth and don't show us the bigger picture of trends
+Year-over-year metrics, running totals, and percent changes show us where the data is headed
+Using the offset function allows us to pull values from other parts of the data table to create these sorts of analysis
+The offset()function requires two inputs:
+offset(${fieldname}, row offset)
+A row offset can be either a positive or negative Number
+A positive offset will grab a value further down the table
+A negative offset will grab a value from higher in the table
+
+Tips:
+Table calculations vs custom fields
+-In an explore, we have the option to create tables calculations and custom dimensions and measures
+-Custom fields allow you to create dimensions and measures directly from an explore without editing the LookML
+Both table calculations and custom fields can be used to create temporary fields in your explore
+
+Custom fields:
+-You need to aggregate over all dataset (5000 rows +)
+-You need to group by the custom field
+-You want to pivot, sort, or filter by field
+-You want a calculation that involves a field not included in the explore
+
+Table calculations:
+-You need a calculation based off of specific column or rows
+-You need to aggregate over a few rows
+-Your explore query typically takes a long time to run
+-You want a calculation that uses one or more fields in the table
+-You cannot download unlimited results when a table calculation is in the Explore
+
+.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
+
+Embedding: Share customized, interactive visualizations by embedding them directly into the tools you use most
+Action Hub: Send or schedule data to tools like Slack to put quick insights in front of the entire team
+Webhooks: Create custom data deliveries when data is available to alert key audiences of important changes
+The API: Pull data sets, visualizations or queries into any tool or platform using the Looker API
+
+Bring looker reports and dashboards into the tools people use the most
+Internal system > looker server > Rendered iframe
+
+Internal system = Looker content embedded via an iframe
+Looker server = confirm access and permissions, prompt for login if needed
+Rendered iframe = Looker content renders in the iframe based on permissions
+
+Embedding Looker:
+1- Identify content to embed
+2- Update embed settings
+3- Create Embed URL (before ? in current URL)
+4- Create iFrame code
+    <div class="iframe-container">
+    <iframe src="https://yourcorp.corp.looker.com/embed/dasboards/1?allow_login_screen=true">
+5- Insert Iframe into Webpage
+    <iframe src="https://yourcorp.corp.looker.com/embed/dasboards/1?allow_login_screen=true" height="1300">
+
+Action Hub: Lets you send data or trigger actions to a wide range of other web services, like slack, twilio, zapier, s3, or email
+1- Enabling an action
+2- Using the action
+What’s the difference between LookerBot for Slack and the Slack Action Hub integration? And if I’m only going to set up one, which should I choose?
+The Slack action Hub is set up on the Looker instance and allows to send and schedule data to reach your Slack instance. You will need to be a Looker user to send the data to Slack.
+The LookerBot is an application that can be deployed by customers to allow Slack users to run commands in their Slack, which will query results from the Looker instance. You will need to have access to Slack to be able to ask data from Looker.
+
+Webhooks: Applications can communicate with each other by 2 ways (pooling or webhooks)
+Send automatically messages for others apps
+-Based in some trigger - an event that tells looker to talk to the other application
+1- Create a Zap between a webhook and gmail
+2- In looker, schedule a look to that webhook
+3- Test your webhooks
+4- Add an action recipient in zapier
+5- Build your email template
+What if I don’t see the webhook destination when trying to send a report?
+There’s a permission, called “send_outgoing_webhook”. If you don’t have that permission, then you won’t see the webhook option. Admins have all permissions by default, but if you’re not an admin you’ll want to ask your admin to give you the “send_outgoing_webhook” permission.
+
+Looker API SDK.. Example Python
+1- Package hosted in pip (pip install looker api)
+2- Set up API specifications:
+
+import lookerapi as looker
+#replace with your custom looker API host domain and port, if applicabl
+base_url = 'https://your.looker.instance:199999/api/3.1/'
+client_id = 'your-API3-client-id'
+client_secret = 'your-API3-client-secret'
+#instantiate looker API
+lookApi = looker.LookApi(client)
+#authenticate client
+token = unauthenticated_autApi.login(client_id=client_id, client_secret=client_secret)
+client = looker.ApiClient(base_url, 'Authorization', 'token ' +token.access_token)
+(there's a script in Looker folder)
+
+Custom visualizations
+>What can be done with custom visualizations
+>How to add files to your looker application
+>Example: Implemented visualizations
+Our online library has some pre-build files 
+You can import tere into your looker application by grabbing the CDN Link within the example page
+-Pre requisites
+A place to store custom visualizations (if you need to host one)
+Looker support must be enable a setting on your licence
+You will also need to enable the labs feature
+
+Warning: Always review code before deploying. Significant resources are required to render 
+items in the browser and poor code can affect all users accessing your looker
+
+How to get plugins: 
+1- Complete all prerequisites
+2- Get the necessary visualizations (javascript files) via one of the three methods:
+    a)Use links from the looker moderated repository (github.com/looker/custom_visualizations_v2) or the blocks site
+    b)Clone the visualization repository and host your own 
+    c)Write one
+3- Get the links to any dependencies (d3, jquery, etc)
+4- Open the Admin Panel > Visualizations > Add Visualization
+
+Add Visualization:
+ID: A unique ID for the visualization
+Label: How to users will see it
+Main: The link to your hosted file
+Dependencies: Make sure to add them in the proper order. If a file references jQuery, jQuery needs to be loaded first
+
+Instructions:
+1) Open your own Looker
+    a) Make sure you have administrator access
+    b) Your company may need a feature enabled - Talk to staff for help
+2) Navigate to the Admin panel > Visualization tab
+3) Add your visualization:
+    a) Click add visualization
+    b) Follow the order in the git repo - order matters
+4) Chose an Explore
+    a) Create a query with one dimension and several measures
+5) Click the Visualization section
+    a) Click the dots - choose your visual '-'
+
+The code:
+create:function(element, config)
+update:function(data, element, config, queryResponse)       #makes change
+
+Advanced Analysis with derived tables
+Joining views to explores is great but:
+I want more flexibility to restructure data and define complex query logic to do cool things like:
+-Cohort and retention Analysis
+-Sessionalize event data
+-Pre-aggregate fields to aggregate Aggregates
+Possible things to do with derived tables:
+Manually written query whose result set can be queried like a regular database table
+SQL Derived Tables vs Native Derived Tables
+-They can be ephermeral or written into the database (PD)
+Something like in script in looker folder
+
+Prepare your issue in the form of a C.U.S.T? question:
+Name of the Customer
+Description of the Unsolved issue
+What Searches you have already tried
+What Testing you have already tried (with links to LookML code files, Explore queries, and/or content where possible)
+any additional, related questions you have
+
+When data gathering for identifying key use cases, keep these objectives in mind:
+Document all the priority use cases aligned to each user and business process—including all
+leading and lagging indicators
+Identify baseline measures for organizational metrics before and after Looker
+Dene "Value 1"—the primary use case(s)
+
+.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
